@@ -110,54 +110,107 @@ export const SKILL_GROUPS: { title: string; items: Skill[] }[] = [
 
 export type PipelineNode = {
   id: string;
-  /** centre in a 1200 × 520 canvas */
+  /** centre in a 1440 × 800 canvas */
   x: number;
   y: number;
   label: string;
   sub: string;
   body: string;
-  /** which Skill renders the tile — by name, or an inline mono tile */
+  /** which Skill renders the tile — by name from SKILL_GROUPS, or an inline one */
   skill: string | Skill;
-  labelPos?: "top" | "bottom";
+  labelPos?: "bottom" | "top" | "none";
 };
 export type PipelineEdge = { from: string; to: string; kind: "data" | "control"; label?: string; route?: "h" | "v" };
+/** a dashed boundary drawn behind the nodes, e.g. the VPC */
+export type PipelineGroup = { id: string; x: number; y: number; w: number; h: number; label: string };
+export type PipelineZone = { label: string; x: number };
+
+const aws = (name: string, file: string): Skill => ({ name, logo: `/assets/logos/aws/${file}.svg`, kind: "aws" });
+const general = (name: string, file: string): Skill => ({ name, logo: `/assets/logos/general/${file}.svg`, kind: "brand", color: "#2f6bff" });
 
 export const PIPELINE_INTRO =
-  "A lakehouse the way I build it: batch sources and event streams land through Glue and MSK into a governed S3 lake, queried in place by Athena and served from Redshift, with Airflow on MWAA deciding what runs when. Hover a service for its role. Trace a record to follow the flow.";
+  "One lakehouse, end to end: relational CDC, key-value streams, documents and SaaS APIs land through DMS, MSK and Glue into a governed S3 lake, served by Athena and Redshift. Airflow schedules it, SNS and SQS trigger it, IAM and Lake Formation govern it, and the compute sits inside a VPC. Hover a service for its role. Trace a record to follow one through.";
 
-export const PIPELINE: { nodes: PipelineNode[]; edges: PipelineEdge[]; lanes: [string, string][][]; skillToNode: Record<string, string> } = {
+export const PIPELINE: {
+  nodes: PipelineNode[];
+  edges: PipelineEdge[];
+  groups: PipelineGroup[];
+  zones: PipelineZone[];
+  lanes: [string, string][][];
+  skillToNode: Record<string, string>;
+} = {
   nodes: [
-    { id: "sources", x: 80, y: 300, label: "Sources", sub: "DBs · APIs · events", body: "Operational databases, SaaS APIs and application events — raw inputs arriving on their own schedules.", skill: { name: "Sources", logo: null, kind: "mono", monogram: "SRC" } },
-    { id: "kafka", x: 330, y: 120, label: "Kafka", sub: "Event streams", body: "Producers publish change events to topics; consumers read them in order, at their own pace.", skill: "Kafka" },
-    { id: "msk", x: 540, y: 120, label: "Amazon MSK", sub: "Managed Kafka", body: "Kafka without babysitting the cluster — brokers, patching and scaling handled by AWS.", skill: "Amazon MSK" },
-    { id: "lakeformation", x: 900, y: 120, label: "Lake Formation", sub: "Governance", body: "Fine-grained permissions on the lake: who may read which tables, columns and rows.", skill: "Lake Formation", labelPos: "top" },
-    { id: "glue", x: 700, y: 300, label: "AWS Glue", sub: "Spark · PySpark · Python", body: "Serverless Spark. Batch ETL and streaming jobs written in PySpark, catalogued as they land.", skill: "AWS Glue" },
-    { id: "s3", x: 900, y: 300, label: "Amazon S3", sub: "Data lake", body: "The lake itself: landing, curated and consumption zones as open-format tables on object storage.", skill: "S3" },
-    { id: "athena", x: 1110, y: 190, label: "Athena", sub: "SQL on the lake", body: "Serverless SQL straight over S3 — no copies, so nothing goes stale.", skill: "Athena" },
-    { id: "redshift", x: 1110, y: 410, label: "Redshift", sub: "Warehouse", body: "The serving layer for heavy analytical workloads and BI.", skill: "Redshift" },
-    { id: "airflow", x: 330, y: 480, label: "Airflow", sub: "Orchestration", body: "DAGs describe what runs after what, with retries and backfills built in.", skill: "Airflow" },
-    { id: "mwaa", x: 540, y: 480, label: "MWAA", sub: "Managed Airflow", body: "Airflow as a managed service — the scheduler that starts every Glue job on time.", skill: "MWAA" },
+    /* ── sources ── */
+    { id: "rdbms", x: 80, y: 100, label: "RDBMS", sub: "Postgres · MySQL", body: "Operational relational databases — the system of record, read without disturbing the transactions running on it.", skill: aws("RDBMS", "rds") },
+    { id: "docs", x: 80, y: 250, label: "Unstructured", sub: "Docs · logs · media", body: "Files that arrive with no schema at all: documents, log drops, images and audio landing straight in the lake.", skill: general("Unstructured", "documents") },
+    { id: "dynamo", x: 80, y: 400, label: "DynamoDB", sub: "Key-value at scale", body: "High-throughput key-value data; its change stream is published as events rather than polled.", skill: aws("DynamoDB", "dynamodb") },
+    { id: "apis", x: 80, y: 550, label: "SaaS APIs", sub: "REST · webhooks", body: "Third-party systems that only speak HTTP — pulled on a schedule or pushed in as webhooks.", skill: general("SaaS APIs", "internet") },
+
+    /* ── ingest ── */
+    { id: "dms", x: 300, y: 100, label: "DMS", sub: "CDC replication", body: "Change data capture: every insert, update and delete replicated continuously, without a nightly full extract.", skill: aws("DMS", "dms") },
+    { id: "kafka", x: 300, y: 475, label: "Kafka", sub: "Event streams", body: "Producers publish to topics, consumers read them in order and at their own pace. The buffer between fast and slow systems.", skill: "Kafka" },
+    { id: "msk", x: 520, y: 475, label: "Amazon MSK", sub: "Managed Kafka", body: "Kafka without babysitting the cluster — brokers, patching and scaling handled by AWS, inside the VPC.", skill: "Amazon MSK" },
+    { id: "s3raw", x: 520, y: 100, label: "S3 landing", sub: "Raw zone", body: "Everything lands here first, unchanged. Raw data is immutable, so any downstream mistake can be replayed.", skill: "S3" },
+
+    /* ── event-driven trigger chain ── */
+    { id: "sns", x: 730, y: 100, label: "SNS", sub: "Object events", body: "An object lands and S3 publishes a notification — a fan-out point, so several consumers can react to the same event.", skill: aws("SNS", "sns") },
+    { id: "sqs", x: 940, y: 100, label: "SQS", sub: "Durable queue", body: "The queue absorbs bursts and holds each message until a job has actually processed it, with a dead-letter queue for the ones that fail.", skill: aws("SQS", "sqs") },
+
+    /* ── core ── */
+    { id: "glue", x: 760, y: 450, label: "AWS Glue", sub: "Spark · PySpark", body: "Serverless Spark. Batch ETL and streaming jobs in PySpark, catalogued as they land so the schema is never a guess.", skill: "AWS Glue" },
+    { id: "s3cur", x: 1010, y: 450, label: "S3 curated", sub: "Governed tables", body: "Modelled, partitioned open-format tables — the consumption layer everything downstream reads.", skill: "S3" },
+
+    /* ── consume ── */
+    { id: "athena", x: 1250, y: 330, label: "Athena", sub: "SQL on the lake", body: "Serverless SQL straight over S3 — no copies, so nothing goes stale.", skill: "Athena" },
+    { id: "redshift", x: 1250, y: 570, label: "Redshift", sub: "Warehouse", body: "The serving layer for heavy analytical workloads and BI concurrency.", skill: "Redshift" },
+
+    /* ── platform & governance ── */
+    { id: "airflow", x: 300, y: 700, label: "Airflow", sub: "DAGs", body: "DAGs describe what runs after what, with retries and backfills built in.", skill: "Airflow" },
+    { id: "mwaa", x: 520, y: 700, label: "MWAA", sub: "Managed Airflow", body: "Airflow as a managed service — the scheduler that starts every job on time.", skill: "MWAA" },
+    { id: "ssm", x: 760, y: 700, label: "SSM", sub: "Parameters", body: "Parameter Store keeps connection strings and job config out of the code and out of the repo.", skill: aws("SSM", "ssm") },
+    { id: "iam", x: 1010, y: 700, label: "IAM", sub: "Least privilege", body: "Roles scoped to the job, not the person. Every service assumes only what it needs for as long as it needs it.", skill: aws("IAM", "iam") },
+    { id: "lakeformation", x: 1250, y: 700, label: "Lake Formation", sub: "Table permissions", body: "Fine-grained permissions on the lake: who may read which tables, columns and rows.", skill: "Lake Formation" },
+
+    /* ── the VPC boundary chip ── */
+    { id: "vpc", x: 492, y: 385, label: "VPC", sub: "Private subnets", body: "The streaming brokers and Spark workers run on private subnets; S3 is reached over a gateway endpoint rather than the open internet.", skill: aws("VPC", "vpc"), labelPos: "none" },
   ],
   edges: [
-    { from: "sources", to: "glue", kind: "data" },
-    { from: "sources", to: "kafka", kind: "data" },
+    { from: "rdbms", to: "dms", kind: "data" },
+    { from: "dms", to: "s3raw", kind: "data" },
+    { from: "docs", to: "s3raw", kind: "data" },
+    { from: "dynamo", to: "kafka", kind: "data" },
+    { from: "apis", to: "kafka", kind: "data" },
     { from: "kafka", to: "msk", kind: "data" },
-    { from: "msk", to: "glue", kind: "data", route: "h" },
-    { from: "glue", to: "s3", kind: "data" },
-    { from: "s3", to: "athena", kind: "data" },
-    { from: "s3", to: "redshift", kind: "data" },
+    { from: "msk", to: "glue", kind: "data" },
+    { from: "s3raw", to: "sns", kind: "data" },
+    { from: "sns", to: "sqs", kind: "data" },
+    { from: "s3raw", to: "glue", kind: "data" },
+    { from: "glue", to: "s3cur", kind: "data" },
+    { from: "s3cur", to: "athena", kind: "data" },
+    { from: "s3cur", to: "redshift", kind: "data" },
+    { from: "sqs", to: "glue", kind: "control", label: "triggers" },
     { from: "airflow", to: "mwaa", kind: "control" },
-    { from: "mwaa", to: "glue", kind: "control", label: "orchestrates", route: "h" },
-    { from: "lakeformation", to: "s3", kind: "control", label: "governs", route: "v" },
+    { from: "mwaa", to: "glue", kind: "control", label: "schedules", route: "h" },
+    { from: "ssm", to: "glue", kind: "control", label: "config", route: "h" },
+    { from: "iam", to: "s3cur", kind: "control", label: "access", route: "h" },
+    { from: "lakeformation", to: "s3cur", kind: "control", label: "governs", route: "h" },
+  ],
+  groups: [{ id: "vpc-box", x: 452, y: 385, w: 396, h: 175, label: "VPC · PRIVATE SUBNETS" }],
+  zones: [
+    { label: "Sources", x: 0 },
+    { label: "Ingest", x: 200 },
+    { label: "Lake", x: 660 },
+    { label: "Consume", x: 1150 },
   ],
   lanes: [
-    [["sources", "glue"], ["glue", "s3"], ["s3", "redshift"]],
-    [["sources", "kafka"], ["kafka", "msk"], ["msk", "glue"], ["glue", "s3"], ["s3", "athena"]],
+    [["rdbms", "dms"], ["dms", "s3raw"], ["s3raw", "glue"], ["glue", "s3cur"], ["s3cur", "redshift"]],
+    [["dynamo", "kafka"], ["kafka", "msk"], ["msk", "glue"], ["glue", "s3cur"], ["s3cur", "athena"]],
+    [["docs", "s3raw"], ["s3raw", "sns"], ["sns", "sqs"], ["sqs", "glue"], ["glue", "s3cur"], ["s3cur", "athena"]],
   ],
   skillToNode: {
-    S3: "s3", "Lake Formation": "lakeformation", Redshift: "redshift", Athena: "athena",
+    S3: "s3cur", "Lake Formation": "lakeformation", Redshift: "redshift", Athena: "athena",
     Spark: "glue", PySpark: "glue", "AWS Glue": "glue", Kafka: "kafka", "Amazon MSK": "msk",
-    Airflow: "airflow", MWAA: "mwaa", Python: "glue", SQL: "athena",
+    Airflow: "airflow", MWAA: "mwaa", Python: "glue", SQL: "athena", AWS: "iam", Terraform: "vpc",
   },
 };
 

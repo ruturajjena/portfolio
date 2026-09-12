@@ -6,7 +6,8 @@ import { useFlow } from "@/lib/use-flow";
 import { ServiceLogo } from "./ServiceLogo";
 import { Magnetic } from "@/components/ui/Magnetic";
 
-const W = 1200, H = 520, HALF = 32;
+const W = 1440, H = 800, HALF = 28;
+const ZONE_BOTTOM = 625; // vertical zone dividers stop above the platform row
 type Pt = [number, number];
 
 function anchors(a: PipelineNode, b: PipelineNode, route?: "h" | "v"): [Pt, Pt, "h" | "v"] {
@@ -66,7 +67,7 @@ export function Pipeline({ focus, onFocus }: Props) {
 
   // ambient packets on every data edge
   const onArrive = useCallback((p: SVGPathElement) => { if (p.dataset.to) light(p.dataset.to); }, [light]);
-  useFlow(svg, { selector: "path[data-kind='data']", perPath: 3, speed: 130, r: 3.5, className: "pipe-packet", onArrive });
+  useFlow(svg, { selector: "path[data-kind='data']", perPath: 2, speed: 130, r: 3.5, className: "pipe-packet", onArrive });
 
   // dim packets that do not touch the focused node
   useEffect(() => {
@@ -142,13 +143,31 @@ export function Pipeline({ focus, onFocus }: Props) {
     <div ref={root} className="pipe-wrap" onPointerLeave={() => onFocus(null)}>
       <p className="mb-3 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-3 md:hidden" aria-hidden>Swipe sideways to explore →</p>
       <div className="-mx-[var(--gutter)] overflow-x-auto px-[var(--gutter)] md:mx-0 md:overflow-visible md:px-0" data-lenis-prevent>
-        <div className="pipe min-w-[880px] md:min-w-0">
+        <div className="pipe min-w-[1180px] md:min-w-0">
       <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="pipe-svg" aria-hidden>
+        {/* zone dividers + labels */}
+        {PIPELINE.zones.map((z, i) => (
+          <g key={z.label} className="pipe-zone">
+            {i > 0 && <path d={`M${z.x} 44 V ${ZONE_BOTTOM}`} className="pipe-zone-rule" vectorEffect="non-scaling-stroke" />}
+            <text x={z.x + 14} y={30} className="pipe-zone-label">{z.label}</text>
+          </g>
+        ))}
+        <path d={`M0 ${ZONE_BOTTOM} H ${W}`} className="pipe-zone-rule" vectorEffect="non-scaling-stroke" />
+        <text x={14} y={ZONE_BOTTOM + 26} className="pipe-zone-label">Platform &amp; governance</text>
+
+        {/* boundaries, e.g. the VPC */}
+        {PIPELINE.groups.map((g) => (
+          <g key={g.id} className="pipe-group">
+            <rect x={g.x} y={g.y} width={g.w} height={g.h} rx="10" className="pipe-group-box" vectorEffect="non-scaling-stroke" />
+            <text x={g.x + 100} y={g.y + 20} className="pipe-group-label">{g.label}</text>
+          </g>
+        ))}
+
         {geometry.map(({ e, d }) => (
           <path key={edgeId(e)} id={edgeId(e)} d={d} className={edgeClass(e)} data-kind={e.kind} data-from={e.from} data-to={e.to} vectorEffect="non-scaling-stroke" />
         ))}
         {geometry.filter(({ e }) => e.label).map(({ e, mid }) => (
-          <text key={`l-${edgeId(e)}`} x={mid[0] + 10} y={mid[1] + 4} className="pipe-edge-label">{e.label}</text>
+          <text key={`l-${edgeId(e)}`} x={mid[0] + 9} y={mid[1] - 6} className="pipe-edge-label">{e.label}</text>
         ))}
         <circle ref={tracer} r="6" className="pipe-tracer" style={{ opacity: 0 }} />
       </svg>
@@ -159,7 +178,7 @@ export function Pipeline({ focus, onFocus }: Props) {
           ref={(el) => { nodeEls.current[n.id] = el; }}
           type="button"
           className={nodeClass(n.id)}
-          style={{ left: `${((n.x - HALF) / W) * 100}%`, top: `${((n.y - HALF) / H) * 100}%` }}
+          style={{ left: `${((n.x - HALF) / W) * 100}%`, top: `${((n.y - HALF) / H) * 100}%`, width: `${((HALF * 2) / W) * 100}%` }}
           onPointerEnter={() => onFocus(n.id)}
           onFocus={() => onFocus(n.id)}
           onBlur={() => onFocus(null)}
@@ -168,10 +187,12 @@ export function Pipeline({ focus, onFocus }: Props) {
           data-cursor=""
         >
           <ServiceLogo skill={resolveSkill(n)} />
-          <span className={`pipe-node__label ${n.labelPos === "top" ? "pipe-node__label--top" : ""}`}>
-            <span className="block font-display font-medium tracking-[-0.01em]">{n.label}</span>
-            <span className="pipe-node__sub block font-mono uppercase tracking-[0.14em]">{n.sub}</span>
-          </span>
+          {n.labelPos !== "none" && (
+            <span className={`pipe-node__label ${n.labelPos === "top" ? "pipe-node__label--top" : ""}`}>
+              <span className="block font-display font-medium tracking-[-0.01em]">{n.label}</span>
+              <span className="pipe-node__sub block font-mono uppercase tracking-[0.14em]">{n.sub}</span>
+            </span>
+          )}
         </button>
       ))}
         </div>

@@ -228,7 +228,7 @@
   }
 
   /* ── pipeline diagram ── */
-  .pipe { position: relative; width: 100%; aspect-ratio: 1200 / 520; }
+  .pipe { position: relative; width: 100%; aspect-ratio: 1440 / 800; }
   .pipe-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
   .pipe-edge { fill: none; stroke-width: 1.25; transition: opacity 400ms var(--ease-out-expo), stroke 400ms var(--ease-out-expo); }
   .pipe-edge--data { stroke: color-mix(in srgb, var(--ink) 30%, transparent); }
@@ -243,7 +243,6 @@
 
   .pipe-node {
     position: absolute;
-    width: 5.3333%;
     padding: 0; border: 0; background: none; text-align: center;
     transition: opacity 400ms var(--ease-out-expo);
   }
@@ -253,10 +252,16 @@
   .pipe-node__label {
     position: absolute; left: 50%; top: 100%; transform: translateX(-50%);
     margin-top: 0.55em; white-space: nowrap;
-    font-size: clamp(11px, 1.05vw, 14px); line-height: 1.25; color: var(--ink);
+    font-size: clamp(10px, 0.86vw, 13px); line-height: 1.2; color: var(--ink);
   }
   .pipe-node__label--top { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 0.55em; }
-  .pipe-node__sub { font-size: 0.68em; color: var(--ink-3); margin-top: 0.15em; }
+  .pipe-node__sub { font-size: 0.66em; color: var(--ink-3); margin-top: 0.15em; }
+
+  /* zones + boundaries */
+  .pipe-zone-rule { fill: none; stroke: color-mix(in srgb, var(--ink) 12%, transparent); stroke-width: 1; stroke-dasharray: 2 6; }
+  .pipe-zone-label { font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; fill: var(--ink-3); }
+  .pipe-group-box { fill: color-mix(in srgb, var(--accent) 3%, transparent); stroke: color-mix(in srgb, var(--accent) 32%, transparent); stroke-width: 1; stroke-dasharray: 6 5; }
+  .pipe-group-label { font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.16em; fill: color-mix(in srgb, var(--accent) 78%, var(--ink-3)); }
   .pipe-node.is-traced .skill-tile::before {
     content: ""; position: absolute; inset: -2px; border-radius: inherit;
     border: 2px solid var(--accent);
