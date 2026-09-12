@@ -161,6 +161,7 @@ export function Pipeline({ focus, onFocus }: Props) {
     runTweens.current.forEach((t) => t.kill());
     runTweens.current = [];
     s.querySelectorAll(".pipe-run-packet").forEach((c) => c.remove());
+    r.classList.remove("is-settled");
     Object.values(nodeEls.current).forEach((el) => el?.classList.remove("is-done", "is-active-run"));
 
     const layer = document.createElementNS(SVG_NS, "g");
@@ -179,7 +180,7 @@ export function Pipeline({ focus, onFocus }: Props) {
         gsap.delayedCall(2.2, () => {
           setRunState("idle");
           if (status) status.textContent = "";
-          Object.values(nodeEls.current).forEach((el) => el?.classList.remove("is-done"));
+          r.classList.add("is-settled");
           layer.remove();
           if (ring) ring.style.strokeDashoffset = String(RING);
         });
@@ -191,11 +192,10 @@ export function Pipeline({ focus, onFocus }: Props) {
     PIPELINE_RUN.forEach((stage, i) => {
       tl.call(() => {
         if (status) status.textContent = `${String(i + 1).padStart(2, "0")} / ${String(PIPELINE_RUN.length).padStart(2, "0")} — ${stage.label}`;
-        stage.nodes.forEach((id) => {
+        stage.nodes.forEach((id, n) => {
           const el = nodeEls.current[id];
           if (!el) return;
-          el.classList.add("is-active-run");
-          light(id, true);
+          gsap.delayedCall(n * 0.09, () => { el.classList.add("is-active-run"); light(id, true); });
         });
         if (!reduced) {
           stage.edges.forEach(([from, to]) => {

@@ -211,18 +211,18 @@
   :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile {
     transform: translateY(-2px) scale(1.04);
   }
-  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--aws .skill-tile__img {
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--aws .skill-tile__img {
     filter: grayscale(0) opacity(1);
   }
-  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--aws::after {
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--aws::after {
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), 0 10px 24px -12px rgba(0, 0, 0, 0.35);
   }
-  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--brand {
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--brand {
     color: var(--brand, var(--accent));
     background: color-mix(in srgb, var(--brand, var(--accent)) 10%, var(--bg-2));
     border-color: color-mix(in srgb, var(--brand, var(--accent)) 35%, var(--rule));
   }
-  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--mono {
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node.is-active-run, .pipe-node.is-done) .skill-tile--mono {
     color: var(--ink); border-color: var(--ink);
   }
 
@@ -251,6 +251,14 @@
     transition: opacity 400ms var(--ease-out-expo);
   }
   .pipe-node .skill-tile { width: 100%; height: auto; aspect-ratio: 1; border-radius: 22%; }
+  /* Diagram icons rest in black and white; a run brings the colour up gradually. */
+  .pipe-node .skill-tile--aws .skill-tile__img { transition: filter 900ms var(--ease-out-expo), transform 520ms var(--ease-out-expo); }
+  .pipe-node .skill-tile--brand, .pipe-node .skill-tile--mono {
+    transition: color 900ms var(--ease-out-expo), background-color 900ms var(--ease-out-expo),
+      border-color 900ms var(--ease-out-expo), transform 420ms var(--ease-out-expo);
+  }
+  /* after a completed run the colour stays; only the ticks retire */
+  .pipe-wrap.is-settled .pipe-node.is-done .pipe-node__tick { opacity: 0; transform: scale(0.4); }
   .pipe-node .skill-tile__mono { font-size: clamp(9px, 0.9vw, 12px); }
   .pipe-node.is-dim { opacity: 0.32; }
   .pipe-node__label {
