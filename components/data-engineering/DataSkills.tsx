@@ -33,7 +33,7 @@ export function DataSkills() {
   }, []);
 
   return (
-    <section id="skills" ref={ref} className="container-x relative py-[18vh] md:py-[22vh]" aria-label="Data engineering stack">
+    <section id="skills" ref={ref} className="container-x relative py-[14vh] md:py-[16vh]" aria-label="Data engineering stack">
       <div className="grid grid-cols-12 gap-x-6 gap-y-10">
         <div className="col-span-12 md:col-span-5">
           <Eyebrow>Stack</Eyebrow>
@@ -42,11 +42,11 @@ export function DataSkills() {
         <FadeIn as="p" className="lede col-span-12 md:col-span-6 md:col-start-7 md:pt-9">{PIPELINE_INTRO}</FadeIn>
       </div>
 
-      <div className="mt-14">
+      <div className="mt-10">
         <Pipeline focus={focus} onFocus={setFocus} />
       </div>
 
-      <div ref={grid} className="mt-20 grid grid-cols-1 gap-x-10 sm:grid-cols-3">
+      <div ref={grid} className="mt-16 grid grid-cols-1 gap-x-10 sm:grid-cols-3">
         {SKILL_GROUPS.map((g) => (
           <div key={g.title}>
             <p className="eyebrow border-t border-rule pt-4">{g.title}</p>

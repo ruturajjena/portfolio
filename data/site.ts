@@ -110,7 +110,7 @@ export const SKILL_GROUPS: { title: string; items: Skill[] }[] = [
 
 export type PipelineNode = {
   id: string;
-  /** centre in a 1440 × 800 canvas */
+  /** centre in a 1320 × 620 canvas */
   x: number;
   y: number;
   label: string;
@@ -141,38 +141,38 @@ export const PIPELINE: {
 } = {
   nodes: [
     /* ── sources ── */
-    { id: "rdbms", x: 80, y: 100, label: "RDBMS", sub: "Postgres · MySQL", body: "Operational relational databases — the system of record, read without disturbing the transactions running on it.", skill: aws("RDBMS", "rds") },
-    { id: "docs", x: 80, y: 250, label: "Unstructured", sub: "Docs · logs · media", body: "Files that arrive with no schema at all: documents, log drops, images and audio landing straight in the lake.", skill: general("Unstructured", "documents") },
-    { id: "dynamo", x: 80, y: 400, label: "DynamoDB", sub: "Key-value at scale", body: "High-throughput key-value data; its change stream is published as events rather than polled.", skill: aws("DynamoDB", "dynamodb") },
-    { id: "apis", x: 80, y: 550, label: "SaaS APIs", sub: "REST · webhooks", body: "Third-party systems that only speak HTTP — pulled on a schedule or pushed in as webhooks.", skill: general("SaaS APIs", "internet") },
+    { id: "rdbms", x: 70, y: 80, label: "RDBMS", sub: "Postgres · MySQL", body: "Operational relational databases — the system of record, read without disturbing the transactions running on it.", skill: aws("RDBMS", "rds") },
+    { id: "docs", x: 70, y: 195, label: "Unstructured", sub: "Docs · logs · media", body: "Files that arrive with no schema at all: documents, log drops, images and audio landing straight in the lake.", skill: general("Unstructured", "documents") },
+    { id: "dynamo", x: 70, y: 310, label: "DynamoDB", sub: "Key-value at scale", body: "High-throughput key-value data; its change stream is published as events rather than polled.", skill: aws("DynamoDB", "dynamodb") },
+    { id: "apis", x: 70, y: 425, label: "SaaS APIs", sub: "REST · webhooks", body: "Third-party systems that only speak HTTP — pulled on a schedule or pushed in as webhooks.", skill: general("SaaS APIs", "internet") },
 
     /* ── ingest ── */
-    { id: "dms", x: 300, y: 100, label: "DMS", sub: "CDC replication", body: "Change data capture: every insert, update and delete replicated continuously, without a nightly full extract.", skill: aws("DMS", "dms") },
-    { id: "kafka", x: 300, y: 475, label: "Kafka", sub: "Event streams", body: "Producers publish to topics, consumers read them in order and at their own pace. The buffer between fast and slow systems.", skill: "Kafka" },
-    { id: "msk", x: 520, y: 475, label: "Amazon MSK", sub: "Managed Kafka", body: "Kafka without babysitting the cluster — brokers, patching and scaling handled by AWS, inside the VPC.", skill: "Amazon MSK" },
-    { id: "s3raw", x: 520, y: 100, label: "S3 landing", sub: "Raw zone", body: "Everything lands here first, unchanged. Raw data is immutable, so any downstream mistake can be replayed.", skill: "S3" },
+    { id: "dms", x: 285, y: 80, label: "DMS", sub: "CDC replication", body: "Change data capture: every insert, update and delete replicated continuously, without a nightly full extract.", skill: aws("DMS", "dms") },
+    { id: "kafka", x: 285, y: 360, label: "Kafka", sub: "Event streams", body: "Producers publish to topics, consumers read them in order and at their own pace. The buffer between fast and slow systems.", skill: "Kafka" },
+    { id: "msk", x: 490, y: 360, label: "Amazon MSK", sub: "Managed Kafka", body: "Kafka without babysitting the cluster — brokers, patching and scaling handled by AWS, inside the VPC.", skill: "Amazon MSK" },
+    { id: "s3raw", x: 495, y: 80, label: "S3 landing", sub: "Raw zone", body: "Everything lands here first, unchanged. Raw data is immutable, so any downstream mistake can be replayed.", skill: "S3" },
 
     /* ── event-driven trigger chain ── */
-    { id: "sns", x: 730, y: 100, label: "SNS", sub: "Object events", body: "An object lands and S3 publishes a notification — a fan-out point, so several consumers can react to the same event.", skill: aws("SNS", "sns") },
-    { id: "sqs", x: 940, y: 100, label: "SQS", sub: "Durable queue", body: "The queue absorbs bursts and holds each message until a job has actually processed it, with a dead-letter queue for the ones that fail.", skill: aws("SQS", "sqs") },
+    { id: "sns", x: 690, y: 80, label: "SNS", sub: "Object events", body: "An object lands and S3 publishes a notification — a fan-out point, so several consumers can react to the same event.", skill: aws("SNS", "sns") },
+    { id: "sqs", x: 880, y: 80, label: "SQS", sub: "Durable queue", body: "The queue absorbs bursts and holds each message until a job has actually processed it, with a dead-letter queue for the ones that fail.", skill: aws("SQS", "sqs") },
 
     /* ── core ── */
-    { id: "glue", x: 760, y: 450, label: "AWS Glue", sub: "Spark · PySpark", body: "Serverless Spark. Batch ETL and streaming jobs in PySpark, catalogued as they land so the schema is never a guess.", skill: "AWS Glue" },
-    { id: "s3cur", x: 1010, y: 450, label: "S3 curated", sub: "Governed tables", body: "Modelled, partitioned open-format tables — the consumption layer everything downstream reads.", skill: "S3" },
+    { id: "glue", x: 700, y: 255, label: "AWS Glue", sub: "Spark · PySpark", body: "Serverless Spark. Batch ETL and streaming jobs in PySpark, catalogued as they land so the schema is never a guess.", skill: "AWS Glue" },
+    { id: "s3cur", x: 900, y: 255, label: "S3 curated", sub: "Governed tables", body: "Modelled, partitioned open-format tables — the consumption layer everything downstream reads.", skill: "S3" },
 
     /* ── consume ── */
-    { id: "athena", x: 1250, y: 330, label: "Athena", sub: "SQL on the lake", body: "Serverless SQL straight over S3 — no copies, so nothing goes stale.", skill: "Athena" },
-    { id: "redshift", x: 1250, y: 570, label: "Redshift", sub: "Warehouse", body: "The serving layer for heavy analytical workloads and BI concurrency.", skill: "Redshift" },
+    { id: "athena", x: 1150, y: 165, label: "Athena", sub: "SQL on the lake", body: "Serverless SQL straight over S3 — no copies, so nothing goes stale.", skill: "Athena" },
+    { id: "redshift", x: 1150, y: 350, label: "Redshift", sub: "Warehouse", body: "The serving layer for heavy analytical workloads and BI concurrency.", skill: "Redshift" },
 
     /* ── platform & governance ── */
-    { id: "airflow", x: 300, y: 700, label: "Airflow", sub: "DAGs", body: "DAGs describe what runs after what, with retries and backfills built in.", skill: "Airflow" },
-    { id: "mwaa", x: 520, y: 700, label: "MWAA", sub: "Managed Airflow", body: "Airflow as a managed service — the scheduler that starts every job on time.", skill: "MWAA" },
-    { id: "ssm", x: 760, y: 700, label: "SSM", sub: "Parameters", body: "Parameter Store keeps connection strings and job config out of the code and out of the repo.", skill: aws("SSM", "ssm") },
-    { id: "iam", x: 1010, y: 700, label: "IAM", sub: "Least privilege", body: "Roles scoped to the job, not the person. Every service assumes only what it needs for as long as it needs it.", skill: aws("IAM", "iam") },
-    { id: "lakeformation", x: 1250, y: 700, label: "Lake Formation", sub: "Table permissions", body: "Fine-grained permissions on the lake: who may read which tables, columns and rows.", skill: "Lake Formation" },
+    { id: "airflow", x: 285, y: 545, label: "Airflow", sub: "DAGs", body: "DAGs describe what runs after what, with retries and backfills built in.", skill: "Airflow" },
+    { id: "mwaa", x: 490, y: 545, label: "MWAA", sub: "Managed Airflow", body: "Airflow as a managed service — the scheduler that starts every job on time.", skill: "MWAA" },
+    { id: "ssm", x: 700, y: 545, label: "SSM", sub: "Parameters", body: "Parameter Store keeps connection strings and job config out of the code and out of the repo.", skill: aws("SSM", "ssm") },
+    { id: "iam", x: 900, y: 545, label: "IAM", sub: "Least privilege", body: "Roles scoped to the job, not the person. Every service assumes only what it needs for as long as it needs it.", skill: aws("IAM", "iam") },
+    { id: "lakeformation", x: 1150, y: 545, label: "Lake Formation", sub: "Table permissions", body: "Fine-grained permissions on the lake: who may read which tables, columns and rows.", skill: "Lake Formation" },
 
     /* ── the VPC boundary chip ── */
-    { id: "vpc", x: 492, y: 385, label: "VPC", sub: "Private subnets", body: "The streaming brokers and Spark workers run on private subnets; S3 is reached over a gateway endpoint rather than the open internet.", skill: aws("VPC", "vpc"), labelPos: "none" },
+    { id: "vpc", x: 470, y: 200, label: "VPC", sub: "Private subnets", body: "The streaming brokers and Spark workers run on private subnets; S3 is reached over a gateway endpoint rather than the open internet.", skill: aws("VPC", "vpc"), labelPos: "none" },
   ],
   edges: [
     { from: "rdbms", to: "dms", kind: "data" },
@@ -195,12 +195,12 @@ export const PIPELINE: {
     { from: "iam", to: "s3cur", kind: "control", label: "access", route: "h" },
     { from: "lakeformation", to: "s3cur", kind: "control", label: "governs", route: "h" },
   ],
-  groups: [{ id: "vpc-box", x: 452, y: 385, w: 396, h: 175, label: "VPC · PRIVATE SUBNETS" }],
+  groups: [{ id: "vpc-box", x: 440, y: 200, w: 330, h: 240, label: "VPC · PRIVATE SUBNETS" }],
   zones: [
     { label: "Sources", x: 0 },
-    { label: "Ingest", x: 200 },
-    { label: "Lake", x: 660 },
-    { label: "Consume", x: 1150 },
+    { label: "Ingest", x: 190 },
+    { label: "Lake", x: 620 },
+    { label: "Consume", x: 1035 },
   ],
   lanes: [
     [["rdbms", "dms"], ["dms", "s3raw"], ["s3raw", "glue"], ["glue", "s3cur"], ["s3cur", "redshift"]],

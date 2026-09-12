@@ -9,8 +9,8 @@ import { useFlow } from "@/lib/use-flow";
 import { ServiceLogo } from "./ServiceLogo";
 import { Magnetic } from "@/components/ui/Magnetic";
 
-const W = 1440, H = 800, HALF = 28;
-const ZONE_BOTTOM = 625; // vertical zone dividers stop above the platform row
+const W = 1320, H = 620, HALF = 26;
+const ZONE_BOTTOM = 500; // vertical zone dividers stop above the platform row
 const SVG_NS = "http://www.w3.org/2000/svg";
 const RING = 2 * Math.PI * 9; // progress ring circumference
 type Pt = [number, number];
@@ -268,18 +268,18 @@ export function Pipeline({ focus, onFocus }: Props) {
             {/* zone dividers + labels */}
             {PIPELINE.zones.map((z, i) => (
               <g key={z.label} className="pipe-zone">
-                {i > 0 && <path d={`M${z.x} 44 V ${ZONE_BOTTOM}`} className="pipe-zone-rule" vectorEffect="non-scaling-stroke" />}
-                <text x={z.x + 14} y={30} className="pipe-zone-label">{z.label}</text>
+                {i > 0 && <path d={`M${z.x} 34 V ${ZONE_BOTTOM}`} className="pipe-zone-rule" vectorEffect="non-scaling-stroke" />}
+                <text x={z.x + 14} y={20} className="pipe-zone-label">{z.label}</text>
               </g>
             ))}
             <path d={`M0 ${ZONE_BOTTOM} H ${W}`} className="pipe-zone-rule" vectorEffect="non-scaling-stroke" />
-            <text x={14} y={ZONE_BOTTOM + 26} className="pipe-zone-label">Platform &amp; governance</text>
+            <text x={14} y={ZONE_BOTTOM + 22} className="pipe-zone-label">Platform &amp; governance</text>
 
             {/* boundaries, e.g. the VPC */}
             {PIPELINE.groups.map((g) => (
               <g key={g.id} className="pipe-group">
                 <rect x={g.x} y={g.y} width={g.w} height={g.h} rx="10" className="pipe-group-box" vectorEffect="non-scaling-stroke" />
-                <text x={g.x + 100} y={g.y + 20} className="pipe-group-label">{g.label}</text>
+                <text x={g.x + 92} y={g.y + 18} className="pipe-group-label">{g.label}</text>
               </g>
             ))}
 
