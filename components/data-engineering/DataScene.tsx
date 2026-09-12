@@ -101,7 +101,7 @@ export function DataScene({ tier, reduced }: { tier: Tier; reduced: boolean }) {
     const lineGeo = new THREE.BufferGeometry();
     lineGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(edgeCount * 6), 3).setUsage(THREE.DynamicDrawUsage));
     lineGeo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 20);
-    const lineMat = new THREE.LineBasicMaterial({ color: "#bcd8ff", transparent: true, opacity: 0 });
+    const lineMat = new THREE.LineBasicMaterial({ color: "#2b2b2e", transparent: true, opacity: 0 });
 
     const flowGeo = new THREE.BufferGeometry();
     flowGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(flowCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
@@ -121,7 +121,7 @@ export function DataScene({ tier, reduced }: { tier: Tier; reduced: boolean }) {
       },
     });
     const nodeGeo = new THREE.OctahedronGeometry(0.048, 0);
-    const nodeMat = new THREE.MeshStandardMaterial({ color: "#eaf2ff", roughness: 0.35, metalness: 0.2, emissive: new THREE.Color("#4f8fff"), emissiveIntensity: 0.35 });
+    const nodeMat = new THREE.MeshStandardMaterial({ color: "#2b2b2e", roughness: 0.45, metalness: 0.25 });
     const current = new Float32Array(n * 3);
     current.set(F[0]);
     return { F, scales, edges, edgeCount, lineGeo, lineMat, flowGeo, flowMat, flowEdge, flowPhase, flowSpeed, nodeGeo, nodeMat, current };
@@ -173,7 +173,7 @@ export function DataScene({ tier, reduced }: { tier: Tier; reduced: boolean }) {
       la[e * 6 + 3] = cur[b * 3]; la[e * 6 + 4] = cur[b * 3 + 1]; la[e * 6 + 5] = cur[b * 3 + 2];
     }
     lp.needsUpdate = true;
-    const edgeVis = range(p, 0.22, 0.45) * 0.12 + range(p, 0.6, 0.8) * 0.1;
+    const edgeVis = range(p, 0.22, 0.45) * 0.2 + range(p, 0.6, 0.8) * 0.16;
     data.lineMat.opacity = edgeVis;
 
     // particles travelling along streams
@@ -191,7 +191,7 @@ export function DataScene({ tier, reduced }: { tier: Tier; reduced: boolean }) {
     fp.needsUpdate = true;
     data.flowMat.uniforms.uTime.value = t;
     data.flowMat.uniforms.uDpr.value = state.gl.getPixelRatio();
-    data.flowMat.uniforms.uOpacity.value = range(p, 0.25, 0.45) * 0.5;
+    data.flowMat.uniforms.uOpacity.value = range(p, 0.25, 0.45) * 0.85;
 
     // scene placement & parallax
     const vp = viewport.getCurrentViewport(camera, [0, 0, 0]);
@@ -206,7 +206,7 @@ export function DataScene({ tier, reduced }: { tier: Tier; reduced: boolean }) {
 
   return (
     <>
-      <VideoPlane mediaKey="data" getOpacity={() => (panelVisible(scroll.view.data) ? 1 : 0)} getView={() => scroll.view.data} sectionVh={520} z={-2.2} scale={1.08} contrast={1.04} dark />
+      <VideoPlane mediaKey="data" getOpacity={() => (panelVisible(scroll.view.data) ? 1 : 0)} getView={() => scroll.view.data} sectionVh={520} z={-2.2} scale={1.08} contrast={1.06} />
       <group ref={group}>
         <instancedMesh ref={inst} args={[data.nodeGeo, data.nodeMat, n]} frustumCulled={false} />
         <lineSegments geometry={data.lineGeo} material={data.lineMat} frustumCulled={false} />

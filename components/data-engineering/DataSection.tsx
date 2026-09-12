@@ -24,7 +24,7 @@ export function DataSection() {
   const reduced = useReducedMotion();
   const near = useInView(ref, "120% 0px 120% 0px");
   const src = useMediaSrc(asset("/assets/video/data.mp4"), asset("/assets/video/data-sm.mp4"));
-  useSectionProgress("data", ref, { dark: true });
+  useSectionProgress("data", ref);
   useVideoScrub("data", { getProgress, isActive, autoplay: reduced, smoothing: 8 });
   const setVideo = useCallback((el: HTMLVideoElement | null) => registerMedia("data", el), []);
 
@@ -42,7 +42,7 @@ export function DataSection() {
   }, []);
 
   return (
-    <section id="data" ref={ref} className="dark-section relative h-[520vh] text-[#f6f4ef]" aria-label="Data engineering">
+    <section id="data" ref={ref} className="relative h-[520vh]" aria-label="Data engineering">
       <div className="sticky top-0 h-screen overflow-hidden">
         {src && (
           <video
@@ -58,7 +58,7 @@ export function DataSection() {
             tabIndex={-1}
           />
         )}
-        <PlateProtection tone="dark" />
+        <PlateProtection />
         <div className="container-x relative z-10 flex h-full flex-col justify-between pb-[8vh] pt-[calc(var(--nav-h)+4vh)]">
           <div ref={intro} className="max-w-[40rem]">
             <Eyebrow>{DATA_INTRO.eyebrow}</Eyebrow>

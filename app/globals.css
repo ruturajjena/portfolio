@@ -163,7 +163,6 @@
     mix-blend-mode: multiply;
   }
   html.no-webgl .plate-media[data-plate="portrait"] { object-fit: contain; mix-blend-mode: normal; opacity: 0.9; }
-  html.no-webgl .plate-media[data-plate="data"] { mix-blend-mode: normal; }
   html.no-webgl .dark-section { background: #0b0b0c; }
 }
 @keyframes scrollhint { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(200%); } }
