@@ -214,6 +214,25 @@ export const PIPELINE: {
   },
 };
 
+/** The staged run played by the "Run pipeline" button. Each stage lights its
+ *  services and sends a burst of packets down its edges. */
+export const PIPELINE_RUN: { label: string; nodes: string[]; edges: [string, string][] }[] = [
+  { label: "Reading from four sources", nodes: ["rdbms", "docs", "dynamo", "apis"], edges: [["rdbms", "dms"], ["docs", "s3raw"], ["dynamo", "kafka"], ["apis", "kafka"]] },
+  { label: "Replicating changes, streaming events", nodes: ["dms", "kafka", "msk"], edges: [["dms", "s3raw"], ["kafka", "msk"]] },
+  { label: "Landing raw, untouched, in S3", nodes: ["s3raw"], edges: [["s3raw", "sns"], ["sns", "sqs"]] },
+  { label: "SQS triggers the job, MWAA schedules it", nodes: ["airflow", "mwaa", "sns", "sqs", "ssm"], edges: [["airflow", "mwaa"], ["sqs", "glue"], ["mwaa", "glue"], ["ssm", "glue"]] },
+  { label: "Transforming in Glue", nodes: ["glue"], edges: [["msk", "glue"], ["s3raw", "glue"]] },
+  { label: "Writing governed tables", nodes: ["s3cur", "iam", "lakeformation"], edges: [["glue", "s3cur"], ["iam", "s3cur"], ["lakeformation", "s3cur"]] },
+  { label: "Serving Athena and Redshift", nodes: ["athena", "redshift"], edges: [["s3cur", "athena"], ["s3cur", "redshift"]] },
+];
+
+export const PIPELINE_RUN_LABELS = {
+  idle: "Run pipeline",
+  running: "Running",
+  done: "Run complete",
+  doneStatus: "Run complete — source systems through to the serving layer.",
+} as const;
+
 export const skillByName = (name: string): Skill | undefined => SKILL_GROUPS.flatMap((g) => g.items).find((s) => s.name === name);
 
 export const DATA_CONCEPTS = [
