@@ -1,26 +1,280 @@
 @import "tailwindcss";
 
+/* ───────────────────────── design tokens ───────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f6f4ef;
+  --bg-2: #eeebe4;
+  --ink: #0e0e0f;
+  --graphite: #2b2b2e;
+  --ink-2: #5a5955;
+  --ink-3: #8f8d87;
+  --rule: #d9d5cc;
+  --accent: #2f6bff;
+  --env-dark: #0b0b0c;
+  --accent-soft: #7cc7ff;
+  --white: #ffffff;
+
+  --font-display: var(--font-inter-tight);
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --nav-h: 72px;
+  --gutter: clamp(20px, 4vw, 64px);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-2: var(--bg-2);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ───────────────────────── base ───────────────────────── */
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: auto;
+  }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+  .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+  .lenis.lenis-stopped { overflow: hidden; }
+
+  body {
+    background: transparent;
+    min-height: 100%;
+    overflow-x: clip;
+  }
+  html.no-webgl body { background: var(--bg); }
+
+  ::selection { background: var(--ink); color: var(--bg); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 0.96;
+    text-wrap: balance;
+  }
+  p { text-wrap: pretty; }
+
+  button { cursor: pointer; }
+  html.has-cursor, html.has-cursor a, html.has-cursor button { cursor: none; }
+}
+
+/* ───────────────────────── components ───────────────────────── */
+@layer components {
+  .container-x { padding-inline: var(--gutter); }
+
+  .eyebrow {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .theme-dark .eyebrow { color: rgba(255,255,255,0.5); }
+
+  .display-xl { font-size: clamp(2.75rem, 8.4vw, 9rem); letter-spacing: -0.045em; line-height: 0.94; }
+  .display-lg { font-size: clamp(2.25rem, 6vw, 6.25rem); letter-spacing: -0.04em; line-height: 0.96; }
+  .display-md { font-size: clamp(1.75rem, 3.8vw, 3.75rem); letter-spacing: -0.03em; line-height: 1.02; }
+  .display-sm { font-size: clamp(1.375rem, 2.2vw, 2rem); letter-spacing: -0.02em; line-height: 1.1; }
+
+  .lede { font-size: clamp(1.0625rem, 1.35vw, 1.375rem); line-height: 1.5; color: var(--ink-2); }
+  .theme-dark .lede { color: rgba(255,255,255,0.7); }
+
+  .hairline { height: 1px; background: var(--rule); }
+  .theme-dark .hairline { background: rgba(255,255,255,0.14); }
+
+  .mask-line { display: block; overflow: hidden; }
+  .mask-line > span { display: block; will-change: transform, opacity; }
+
+  .link-underline {
+    position: relative;
+    text-decoration: none;
+  }
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 420ms var(--ease-out-expo);
+  }
+  .link-underline:hover::after, .link-underline:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ───────────────────────── reduced motion (intentionally unlayered) ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .mask-line > span { transform: none !important; opacity: 1 !important; }
 }
+
+/* ───────────────────────── media plates ───────────────────────── */
+@layer components {
+  /* The WebGL stage samples these; they stay in the DOM but out of view. */
+  .plate-media {
+    position: absolute;
+    left: -20px; top: 0;
+    width: 2px; height: 2px;
+    opacity: 0.02;
+    pointer-events: none;
+  }
+  html.no-webgl .plate-media {
+    position: absolute; inset: 0; left: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 1;
+    mix-blend-mode: multiply;
+  }
+  html.no-webgl .plate-media[data-plate="portrait"] { object-fit: contain; mix-blend-mode: normal; opacity: 0.9; }
+  html.no-webgl .plate-media[data-plate="data"] { mix-blend-mode: normal; }
+  html.no-webgl .dark-section { background: #0b0b0c; }
+}
+@keyframes scrollhint { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(200%); } }
+
+/* ───────────────────────── service / skill logos ───────────────────────── */
+@layer components {
+  .skill-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: 0.625rem;
+    overflow: hidden;
+    background: var(--white);
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+    transition: transform 420ms var(--ease-out-expo), color 420ms var(--ease-out-expo), border-color 420ms var(--ease-out-expo),
+      box-shadow 420ms var(--ease-out-expo), background-color 420ms var(--ease-out-expo);
+  }
+  .skill-tile--aws { padding: 0; border-color: transparent; }
+  .skill-tile--aws .skill-tile__img {
+    width: 100%; height: 100%;
+    filter: grayscale(1) opacity(0.62);
+    transition: filter 520ms var(--ease-out-expo), transform 520ms var(--ease-out-expo);
+  }
+  .skill-tile--aws::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--rule);
+    transition: box-shadow 420ms var(--ease-out-expo);
+  }
+  .skill-tile--brand { background: var(--bg-2); }
+  .skill-tile__mark {
+    width: 56%; height: 56%;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: center; mask-position: center;
+    -webkit-mask-size: contain; mask-size: contain;
+  }
+  .skill-tile--mono { background: var(--bg-2); color: var(--ink-3); }
+  .skill-tile__mono { font-size: 0.625rem; }
+
+  /* one "on" state shared by list rows, diagram nodes, and packet arrivals */
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit) .skill-tile {
+    transform: translateY(-2px) scale(1.04);
+  }
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit) .skill-tile--aws .skill-tile__img {
+    filter: grayscale(0) opacity(1);
+  }
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit) .skill-tile--aws::after {
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08), 0 10px 24px -12px rgba(0, 0, 0, 0.35);
+  }
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit) .skill-tile--brand {
+    color: var(--brand, var(--accent));
+    background: color-mix(in srgb, var(--brand, var(--accent)) 10%, var(--bg-2));
+    border-color: color-mix(in srgb, var(--brand, var(--accent)) 35%, var(--rule));
+  }
+  :is(.skill-row:hover, .skill-row:focus-within, .skill-row.is-active, .pipe-node:hover, .pipe-node:focus-visible, .pipe-node.is-active, .pipe-node.is-lit) .skill-tile--mono {
+    color: var(--ink); border-color: var(--ink);
+  }
+
+  /* ── pipeline diagram ── */
+  .pipe { position: relative; width: 100%; aspect-ratio: 1200 / 520; }
+  .pipe-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .pipe-edge { fill: none; stroke-width: 1.25; transition: opacity 400ms var(--ease-out-expo), stroke 400ms var(--ease-out-expo); }
+  .pipe-edge--data { stroke: color-mix(in srgb, var(--ink) 30%, transparent); }
+  .pipe-edge--control { stroke: color-mix(in srgb, var(--ink) 26%, transparent); stroke-dasharray: 5 7; }
+  .pipe-edge.is-related { stroke: var(--accent); }
+  .pipe-edge.is-dim { opacity: 0.22; }
+  .pipe-edge-label { font-family: var(--font-mono), monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; fill: var(--ink-3); }
+  .pipe-packet { fill: var(--accent); transition: opacity 400ms var(--ease-out-expo); filter: drop-shadow(0 0 3px rgba(47, 107, 255, 0.45)); }
+  .pipe-packet.is-dim { opacity: 0.12; }
+  .pipe.is-tracing .pipe-packet { opacity: 0.28; }
+  .pipe-tracer { fill: #fff; stroke: var(--accent); stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(47, 107, 255, 0.8)); }
+
+  .pipe-node {
+    position: absolute;
+    width: 5.3333%;
+    padding: 0; border: 0; background: none; text-align: center;
+    transition: opacity 400ms var(--ease-out-expo);
+  }
+  .pipe-node .skill-tile { width: 100%; height: auto; aspect-ratio: 1; border-radius: 22%; }
+  .pipe-node .skill-tile__mono { font-size: clamp(9px, 0.9vw, 12px); }
+  .pipe-node.is-dim { opacity: 0.32; }
+  .pipe-node__label {
+    position: absolute; left: 50%; top: 100%; transform: translateX(-50%);
+    margin-top: 0.55em; white-space: nowrap;
+    font-size: clamp(11px, 1.05vw, 14px); line-height: 1.25; color: var(--ink);
+  }
+  .pipe-node__label--top { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 0.55em; }
+  .pipe-node__sub { font-size: 0.68em; color: var(--ink-3); margin-top: 0.15em; }
+  .pipe-node.is-traced .skill-tile::before {
+    content: ""; position: absolute; inset: -2px; border-radius: inherit;
+    border: 2px solid var(--accent);
+    animation: pipe-ring 900ms var(--ease-out-expo) forwards;
+    pointer-events: none;
+  }
+  .pipe-caption {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem;
+    margin-top: 1.5rem; border-top: 1px solid var(--rule); padding-top: 1rem;
+  }
+  @media (max-width: 767px) { .pipe-caption { flex-direction: column; gap: 0.75rem; } .pipe-wrap .pipe { margin-bottom: 0.5rem; } }
+
+  /* packets in the Selected Builds lakehouse diagram */
+  .flow-dot { fill: #7cc7ff; filter: drop-shadow(0 0 3px rgba(124, 199, 255, 0.7)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skill-tile, .skill-tile__img, .skill-tile__mark, .skill-tile--aws::after, .pipe-edge, .pipe-node { transition: none !important; }
+    .skill-row:hover .skill-tile, .pipe-node:hover .skill-tile { transform: none; }
+  }
+}
+@keyframes pipe-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }

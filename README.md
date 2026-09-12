@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ruturaj Jena — portfolio
 
-## Getting Started
+**Live → https://ruturajjena.github.io/portfolio/**
 
-First, run the development server:
+A scroll-driven portfolio built as one continuous film: a keyed 3D portrait,
+two cinematic plates scrubbed frame-by-frame by the scroll position, and a
+live AWS pipeline diagram that moves real data between real service icons.
+
+**Stack** — Next.js 16 (App Router, static export) · TypeScript · Tailwind v4 ·
+Three.js / React Three Fiber · GSAP + ScrollTrigger · Lenis.
+
+---
+
+## Run it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production build (static export into `out/`):
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The deployed site lives under `/portfolio`, so a local production preview needs
+the same prefix:
 
-## Learn More
+```bash
+NEXT_PUBLIC_BASE_PATH=/portfolio npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## How it is put together
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**One WebGL stage, many scenes.** A single `<Canvas>` is fixed behind the whole
+page (`components/three/Stage.tsx`). Every section contributes a scene that
+reads its own scroll progress and hides itself when off-screen, so there is
+exactly one renderer and one frame loop for the entire site.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Scroll is the projector.** Section progress is written into a plain mutable
+store (`lib/scroll-store.ts`) by ScrollTrigger and read inside the frame loop.
+Scroll position never enters React state, so scrolling causes no re-renders.
 
-## Deploy on Vercel
+**Video as a material, not an element.** The three films are decoded into
+`THREE.VideoTexture`s and composited by a shader: light plates multiply against
+the page, dark plates feather into the environment colour. The `<video>` tags
+stay in the DOM only as decode sources. They are re-encoded with a two-frame GOP
+so `currentTime` seeks land on exact frames under a scrub.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**The pipeline diagram** (`components/data-engineering/Pipeline.tsx`) is SVG, not
+WebGL: packets ride real path geometry via GSAP MotionPath, so the flow follows
+the curves exactly and stays crisp at any zoom.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Assets
+
+Service marks are the official [AWS Architecture Icons](https://aws.amazon.com/architecture/icons/);
+other tool logos come from [Simple Icons](https://simpleicons.org). They are used
+to identify the technologies behind the work.
+
+## Accessibility
+
+Semantic landmarks and headings, keyboard-reachable diagram nodes with visible
+focus, a skip link, and alt text on every product screenshot. Under
+`prefers-reduced-motion` the particles, packets, tilts and camera moves stop and
+the films play normally instead of scrubbing.
